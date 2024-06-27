@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pick Up Your Photo</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background: linear-gradient(135deg, #00CED1, #FFD700);
+            color: #2F4F4F;
+            text-align: center;
+        }
+
+        .container {
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .polaroid {
+            width: 300px;
+            padding: 10px;
+            border: 10px solid white;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .polaroid img {
+            width: 100%;
+        }
+
+        .caption {
+            padding: 10px 0 0;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .buttons button {
+            background: #00CED1;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .buttons button:hover {
+            background: #008B8B;
+        }
+
+        .logo {
+            width: 150px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    {#        <img src="file-DorOO1tSx7HRaOZkjaYCuJqR" alt="Memory Lane Photo Booths" class="logo">#}
+    <div class="polaroid">
+        <img src="{{ presigned_url }}" alt="Your MemoryLane Photobooth picture">
+        <div class="caption">Your Fun Memory!</div>
+    </div>
+    <div class="buttons">
+        <button onclick="downloadPhoto()">Save</button>
+        <button onclick="shareWhatsApp()">WhatsApp</button>
+        <button onclick="shareSMS()">SMS</button>
+        <button onclick="shareEmail()">Email</button>
+    </div>
+</div>
+
+<script>
+    function downloadPhoto() {
+        const presignedUrl = '{{ presigned_url | safe}}';
+        const link = document.createElement('a');
+        link.href = presignedUrl;
+        link.download = 'Your_Photo.jpg';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function shareWhatsApp() {
+        const url = encodeURIComponent(window.location.href);
+        const message = encodeURIComponent('Check out my photo from Memory Lane Photo Booths!');
+        window.open(`https://api.whatsapp.com/send?text=${message} ${url}`, '_blank');
+    }
+
+    function shareSMS() {
+        const url = encodeURIComponent(window.location.href);
+        const message = encodeURIComponent('Check out my photo from Memory Lane Photo Booths!');
+        window.open(`sms:?&body=${message} ${url}`, '_blank');
+    }
+
+    function shareEmail() {
+        const url = encodeURIComponent(window.location.href);
+        const subject = encodeURIComponent('My Photo from Memory Lane Photo Booths');
+        const body = encodeURIComponent('Check out my photo from Memory Lane Photo Booths!\n\n') + url;
+        window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+    }
+</script>
+</body>
+</html>

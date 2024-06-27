@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="{{ refresh_in }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Booth Uploading...</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #00CED1, #FFD700); /* Matching the teal and gold from the logo */
+            color: #2F4F4F; /* Dark Slate Gray for better contrast */
+            text-align: center;
+        }
+
+        .container {
+            animation: pulse 2s infinite;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #008080; /* Teal color */
+        }
+
+        .loader {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #FFD700; /* Gold color */
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #2F4F4F; /* Dark Slate Gray */
+        }
+
+        .dots {
+            display: inline-block;
+            font-size: 1.5rem;
+        }
+
+        .logo {
+            width: 200px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+{#    <img src="memorylane-logo" alt="Memory Lane Photo Booths" class="logo">#}
+    <h1>Uploading Your Photos!</h1>
+    <div class="loader"></div>
+    <p>Please wait while we upload your photos <span class="dots">...</span></p>
+</div>
+<script>
+    let dots = document.querySelector('.dots');
+    let dotCount = 0;
+    setInterval(() => {
+        dotCount = (dotCount + 1) % 4;
+        dots.textContent = '.'.repeat(dotCount);
+    }, 500);
+</script>
+</body>
+</html>
