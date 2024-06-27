@@ -8,7 +8,7 @@ import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 import logging
 
-
+logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
 # Configuration options
@@ -58,6 +58,9 @@ def initialize_db():
     conn.commit()
     conn.close()
 
+# Ensure the database is initialized at startup
+with app.app_context():
+    initialize_db()
 
 def check_api_key(req_key):
     """
@@ -132,6 +135,7 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
                                                     ExpiresIn=expiration)
     except NoCredentialsError:
         print("No AWS credentials found")
+        app.logger.error("No AWS credentials found")
         return None
 
     # The response contains the presigned URL
@@ -179,12 +183,14 @@ def pba_shareservice():
                               (result_dict['file_identifier'],))
                     conn.commit()
                     conn.close()
+                    app.logger.debug("Assigned job for file %s", result_dict['file_identifier'])
 
                     yield '%s\n' % json.dumps(result_dict)
 
                 if not results:
                     time.sleep(loop_time)
                     time_processed += loop_time
+                    app.logger.debug("No pending uploads, sleeping for %s seconds", loop_time)
                     yield '%s\n' % json.dumps({'ping': time.time()})
 
         return Response(generate(), mimetype='text/event-stream')
@@ -268,13 +274,14 @@ def pba_shareservice():
         # c.execute("SELECT * FROM upload_requests WHERE file_identifier = ? AND (status = 'uploaded' OR status = 'job_assigned')", (file_id,))
         result = c.fetchone()
         print(result)
+        app.logger.debug("Result: %s", result)
 
         # need to also check for job_assigned status
 
         if result is not None:
             filename = result[1]  # Assuming the filename is the second column in the table
             conn.close()
-
+            app.logger.debug("File %s is ready for download", filename)
             # Generate a presigned URL for the S3 object
             presigned_url = create_presigned_url(S3_BUCKET, filename)
             print(presigned_url)
@@ -288,6 +295,7 @@ def pba_shareservice():
             result_ts = c.fetchone()
             print("result_ts")
             print(result_ts)
+            app.logger.debug("Result: %s", result_ts)
 
             if result_ts is None:
                 c.execute("INSERT INTO upload_requests (file_identifier, status) VALUES (?, 'pending')", (file_id,))
