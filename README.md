@@ -57,6 +57,7 @@ Start the Flask application:
 
 ```shell
 python app.py
+flask run --reload --debug --host 0.0.0.0 # Alternatively, use the Flask CLI
 ```
 
 
