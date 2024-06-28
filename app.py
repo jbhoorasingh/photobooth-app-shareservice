@@ -199,71 +199,6 @@ def pba_shareservice():
 
         return Response(generate(), mimetype='text/event-stream')
 
-    elif action == 'download_old':
-        file_id = request.args.get('id')
-
-        if file_id is None:
-            abort(400, description="Missing file id")
-
-        conn = sqlite3.connect(DB_FILENAME)
-        c = conn.cursor()
-        c.execute("SELECT * FROM upload_requests WHERE file_identifier = ? AND status = 'uploaded'", (file_id,))
-        result = c.fetchone()
-
-        if result is None:
-            # Insert a new entry into the database
-            c.execute("INSERT INTO upload_requests (file_identifier, status) VALUES (?, 'pending')", (file_id,))
-            conn.commit()
-
-            # Wait for TIMEOUT_DOWNLOAD seconds
-            time.sleep(TIMEOUT_DOWNLOAD)
-
-            # Check again if the file is uploaded
-            c.execute("SELECT * FROM upload_requests WHERE file_identifier = ? AND status = 'uploaded'", (file_id,))
-            result = c.fetchone()
-
-            if result is None:
-                conn.close()
-                return jsonify({"message": "Upload failed, Photobooth might have lost internet"}), 500
-
-        filename = result[1]  # Assuming the filename is the second column in the table
-        conn.close()
-
-        return send_from_directory(WORK_DIRECTORY, filename, as_attachment=True)
-
-    elif action == 'download_old2':
-        file_id = request.args.get('id')
-
-        if file_id is None:
-            abort(400, description="Missing file id")
-
-        # check if this is the first time requesting the file
-        if not request.args.get('retry'):
-            conn = sqlite3.connect(DB_FILENAME)
-            c = conn.cursor()
-            c.execute("SELECT * FROM upload_requests WHERE file_identifier = ? AND status = 'uploaded'", (file_id,))
-            result = c.fetchone()
-
-            if result is None:
-                # Insert a new entry into the database
-                c.execute("INSERT INTO upload_requests (file_identifier, status) VALUES (?, 'pending')", (file_id,))
-                conn.commit()
-
-                # Wait for TIMEOUT_DOWNLOAD seconds
-                time.sleep(TIMEOUT_DOWNLOAD)
-
-                # Check again if the file is uploaded
-                c.execute("SELECT * FROM upload_requests WHERE file_identifier = ? AND status = 'uploaded'", (file_id,))
-                result = c.fetchone()
-
-                if result is None:
-                    conn.close()
-                    return jsonify({"message": "Upload failed, Photobooth might have lost internet"}), 500
-
-            filename = result[1]  # Assuming the filename is the second column in the table
-            conn.close()
-
-            return send_from_directory(WORK_DIRECTORY, filename, as_attachment=True)
 
     elif action == 'download':
         file_id = request.args.get('id')
@@ -315,24 +250,6 @@ def pba_shareservice():
 
             return render_template('photo_darkroom.html', retry=retry, refresh_in=5)
 
-
-
-    elif action == 'upload_old':
-        if 'upload_file' not in request.files:
-            abort(400, description="No file part in the request")
-        file = request.files['upload_file']
-        if file.filename == '':
-            abort(400, description="No selected file")
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(WORK_DIRECTORY, filename))
-            file_id = request.form.get('id')
-            conn = sqlite3.connect(DB_FILENAME)
-            c = conn.cursor()
-            c.execute("REPLACE INTO upload_requests (file_identifier, filename, status) VALUES (?, ?, 'uploaded')", (file_id, filename))
-            conn.commit()
-            conn.close()
-            return jsonify({"message": "File successfully uploaded and ready to download"})
 
     elif action == 'upload':
         apikey = request.form.get('apikey')
