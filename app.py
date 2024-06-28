@@ -164,34 +164,38 @@ def pba_shareservice():
             loop_time_max = 240  # after x seconds, the script terminates and the client is expected to create a new connection latest
             time_processed = 0
 
-            while time_processed <= loop_time_max:
-                conn = sqlite3.connect(DB_FILENAME)
-                c = conn.cursor()
-                c.execute("SELECT * FROM upload_requests WHERE status = 'pending'")
-                results = c.fetchall()
-                conn.close()
-
-                for result in results:
-                    # Get column names from cursor.description
-                    column_names = [column[0] for column in c.description]
-                    # Create a dictionary from column names and result
-                    result_dict = dict(zip(column_names, result))
-
+            try:
+                while time_processed <= loop_time_max:
                     conn = sqlite3.connect(DB_FILENAME)
                     c = conn.cursor()
-                    c.execute("UPDATE upload_requests SET status = 'job_assigned' WHERE file_identifier = ?",
-                              (result_dict['file_identifier'],))
-                    conn.commit()
+                    c.execute("SELECT * FROM upload_requests WHERE status = 'pending'")
+                    results = c.fetchall()
                     conn.close()
-                    app.logger.debug("Assigned job for file %s", result_dict['file_identifier'])
 
-                    yield '%s\n' % json.dumps(result_dict)
+                    for result in results:
+                        # Get column names from cursor.description
+                        column_names = [column[0] for column in c.description]
+                        # Create a dictionary from column names and result
+                        result_dict = dict(zip(column_names, result))
 
-                if not results:
-                    time.sleep(loop_time)
-                    time_processed += loop_time
-                    app.logger.debug("No pending uploads, sleeping for %s seconds", loop_time)
-                    yield '%s\n' % json.dumps({'ping': time.time()})
+                        conn = sqlite3.connect(DB_FILENAME)
+                        c = conn.cursor()
+                        c.execute("UPDATE upload_requests SET status = 'job_assigned' WHERE file_identifier = ?",
+                                  (result_dict['file_identifier'],))
+                        conn.commit()
+                        conn.close()
+                        app.logger.debug("Assigned job for file %s", result_dict['file_identifier'])
+
+                        yield '%s\n' % json.dumps(result_dict)
+
+                    if not results:
+                        time.sleep(loop_time)
+                        time_processed += loop_time
+                        # app.logger.debug("No pending uploads, sleeping for %s seconds", loop_time)
+                        yield '%s\n' % json.dumps({'ping': time.time()})
+            except OSError:
+                print("Client disconnected, stopping the response stream.")
+                return  # Exit the generator function gracefully
 
         return Response(generate(), mimetype='text/event-stream')
 
