@@ -248,7 +248,7 @@ def pba_shareservice():
             if retry > 6:
                 return jsonify({"message": "Upload failed, Photobooth might have lost internet"}), 500
 
-            return render_template('photo_darkroom.html', retry=retry, refresh_in=5)
+            return render_template('photo_darkroom.html', retry=retry, refresh_in=10)
 
 
     elif action == 'upload':
