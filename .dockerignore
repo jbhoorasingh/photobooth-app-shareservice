@@ -1,0 +1,6 @@
+.env
+.venv
+.idea
+jobs.sqlite3
+README.md
+.gitignore

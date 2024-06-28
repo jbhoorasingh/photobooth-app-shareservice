@@ -14,6 +14,7 @@ This project is a Python implementation of the PhotoBooth-App ShareService. It p
 
 ## Watch: User Exprience
 [![Watch the video](http://i3.ytimg.com/vi/agiDfWkOLFE/hqdefault.jpg)](https://youtu.be/agiDfWkOLFE)
+
 ## Getting Started: Development
 Prerequisites:
 - Python 3.10 or higher
@@ -58,6 +59,13 @@ Start the Flask application:
 ```shell
 python app.py
 flask run --reload --debug --host 0.0.0.0 # Alternatively, use the Flask CLI
+```
+
+## Getting Started: Docker
+```shell
+docker build -t photobooth-app-shareservice:latest .
+docker run -d -p 8080:80 --env-file .env photobooth-app-shareservice:latest
+
 ```
 
 
