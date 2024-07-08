@@ -1,0 +1,15 @@
+version: '3'
+services:
+  photobooth:
+    image: jermaineb/photobooth-app-shareservice:latest
+    ports:
+      - "4433:8080"
+    environment:
+      PHA_SS_APIKEY: ${PHA_SS_APIKEY}
+      S3_SECRET: ${S3_SECRET}
+      S3_KEY: ${S3_KEY}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_REGION: ${S3_REGION}
+      S3_SUBFOLDER: ${S3_SUBFOLDER}
+      FLASK_HOST: ${FLASK_HOST}
