@@ -64,8 +64,7 @@ flask run --reload --debug --host 0.0.0.0 --port 8080 # Alternatively, use the F
 ## Getting Started: Docker
 ```shell
 docker pull jermaineb/photobooth-app-shareservice:latest
-docker build -t photobooth-app-shareservice:latest .
-docker run -d -p 8080:80 --env-file .env photobooth-app-shareservice:latest
+docker run -d -p 8080:80 --env-file .env jermaineb/photobooth-app-shareservice:latest
 
 ```
 
